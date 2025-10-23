@@ -45,6 +45,10 @@
             Quản Lý Khách Hàng
           </p>
         </a>
+        <a href="pages/suggestsupport.php" class="nav-link">
+          <i class="nav-icon fas fa-life-ring"></i>
+          <p>Quản Lý Hỗ Trợ</p>
+        </a>
 
     </nav>
     <!-- /.sidebar-menu -->

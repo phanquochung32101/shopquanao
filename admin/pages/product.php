@@ -89,6 +89,11 @@ $query_AllProduct = mysqli_query($mysqli, $sqlAllProduct);
               </p>
             </a>
 
+            <a href="suggestsupport.php" class="nav-link">
+              <i class="nav-icon fas fa-life-ring"></i>
+              <p>Quản Lý Hỗ Trợ</p>
+              </a>
+
         </nav>
         <!-- /.sidebar-menu -->
       </div>

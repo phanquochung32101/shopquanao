@@ -285,8 +285,8 @@ if (isset($_GET['message'])) {
                                         </div>
                                     </li>
                                     <li class="mega-women"><a href="product/categoryList.php">Danh mục</a>
-
                                     </li>
+                                    <li><a href="support/index.php">Hỗ trợ</a></li>
 
                                 </ul>
                             </nav>
@@ -300,6 +300,8 @@ if (isset($_GET['message'])) {
 
                                     </li>
                                     <li><a href="#">Danh mục</a></li>
+
+                                    <li><a href="support/index.php">Hỗ trợ</a></li>
 
                                     <li><a>Sản phẩm</a>
                                         <ul>

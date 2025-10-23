@@ -292,8 +292,8 @@ if (isset($_GET['errCode'])) {
                                             </div>
                                         </div>
                                     </li>
-                                    <li class="mega-women"><a href="categoryList.php " style="color: black;">Danh
-                                            mục</a>
+                                    <li class="mega-women"><a href="categoryList.php " style="color: black;">Danh mục</a>
+                                <li><a href="../support/index.php" style="color: black;">Hỗ trợ</a></li>
                                 </ul>
                             </nav>
                         </div>
@@ -315,11 +315,6 @@ if (isset($_GET['errCode'])) {
                                                 </li>
                                             <?php } ?>
                                         </ul>
-
-                                    </li>
-                                    <li class="mega-women"><a href="../shop.html" style="color: black;">Sản Phẩm</a>
-                                    <li><a href="shop.html">Liên Hệ</a>
-                                    </li>
                                 </ul>
                             </nav>
                         </div>

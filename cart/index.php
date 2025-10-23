@@ -226,6 +226,7 @@ if (!function_exists('currency_format')) {
                                     </li>
                                     <li class="mega-women"><a href="../product/categoryList.php"
                                             style="color: black;">Danh mục</a>
+                                 <li><a href="../support/index.php" style="color: black;">Hỗ trợ</a></li>
                                 </ul>
                             </nav>
                         </div>

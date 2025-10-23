@@ -213,6 +213,7 @@ $query_getCategoryMobile = mysqli_query($mysqli, $sql_getCategoryMobile);
                                     </li>
                                     <li class="mega-women"><a href="#">Danh mục</a>
                                     </li>
+                                    <li><a href="../support/index.php">Hỗ trợ</a></li>
                                 </ul>
                             </nav>
                         </div>
@@ -234,10 +235,6 @@ $query_getCategoryMobile = mysqli_query($mysqli, $sql_getCategoryMobile);
                                                 </li>
                                             <?php } ?>
                                         </ul>
-
-                                    </li>
-                                    <li><a href="../shop.html">Liên Hệ</a>
-                                    </li>
                                 </ul>
                             </nav>
                         </div>
