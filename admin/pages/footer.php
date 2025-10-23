@@ -5,13 +5,13 @@
                             <div class="col-md-3 col-sm-4">
                                    <div class="footer-contact">
                                           <img src="#" alt="">
-                                          <p>Trang web được xây dựng bởi Quốc Bảo Shop, dưới đây là thông tin liên lạc:
+                                          <p>Trang web được xây dựng bởi Thành Đạt và Quốc Hưng, dưới đây là thông tin liên lạc:
                                           </p>
                                           <ul class="address">
 
                                                  <li>
                                                         <span class="fa fa-phone"></span>
-                                                        038 246 0421
+                                                        0334043054
                                                  </li>
                                                  <li>
                                                         <span class="fa fa-github"></span>
@@ -19,7 +19,7 @@
                                                  </li>
                                                  <li>
                                                         <span class="fa fa-envelope-o"></span>
-                                                        038 246 0421
+                                                        quochungdz2017@gmail.com
                                                  </li>
                                           </ul>
                                    </div>
@@ -47,10 +47,8 @@
                                           </div>
                                           <div class="footer-menu">
                                                  <ul>
-                                                        <li><a href="#">Nguyễn Hà Quốc Bảo</a></li>
-                                                        <li><a href="#">Phan Thanh Du</a></li>
-                                                        <li><a href="#">Vũ Đình Dũng</a></li>
-                                                        <li><a href="#">Phạm Minh Đảo</a></li>
+                                                        <li><a href="#">Phan Quốc Hưng</a></li>
+                                                        <li><a href="#">Võ Thành Đạt</a></li>
                                                  </ul>
                                           </div>
                                    </div>
@@ -63,10 +61,8 @@
                                           <div class="footer-menu">
                                                  <ul>
 
-                                                        <li><a href="#">311 941 0032</a></li>
-                                                        <li><a href="#">311 941 0061</a></li>
-                                                        <li><a href="#">311 941 0067</a></li>
-                                                        <li><a href="#">311 941 0080</a></li>
+                                                        <li><a href="#">2251120292</a></li>
+                                                        <li><a href="#">2251120285</a></li>
                                                  </ul>
                                           </div>
                                    </div>
