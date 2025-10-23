@@ -25,8 +25,11 @@ if (isset($_GET['errCode'])) {
     $result = "Xác nhận đơn hàng thành công !";
   } elseif ($_GET['errCode'] == 1) {
     $result = "Xác nhận đơn hàng Thất bại !";
+  } elseif ($_GET['errCode'] == 2) {
+    $result = "Đã hủy đơn hàng !";
   }
 }
+
 if (!function_exists('currency_format')) {
   function currency_format($number, $suffix = 'đ')
   {
@@ -113,12 +116,14 @@ if (!function_exists('currency_format')) {
                   $Money = 0;
                   while ($row = mysqli_fetch_array($query_getNewOrder)) {
 
-                    if ($row['trangThaiDonHang'] == 0) {
-                      $newOrder++;
-                    } else {
-                      $Money += $row['tongGia'];
-                      $successOrder++;
-                    }
+                     if ((int)$row['trangThaiDonHang'] === 0) {
+                        // 0 = chờ xác nhận
+                       $newOrder++;
+                    } elseif ((int)$row['trangThaiDonHang'] === 1) {
+                         // 1 = đã xác nhận/thành công -> mới tính doanh thu & số đơn thành công
+                     $Money += (float)$row['tongGia'];
+                   $successOrder++;
+                     }
                   }
                   ?>
                   <h3>
@@ -240,10 +245,12 @@ if (!function_exists('currency_format')) {
                           href="../function.php?idOrderSuccess=<?php echo $row_getOrdersNotSuccess['maDonHang'] ?>">
                           Xác nhận
                         </a>
-                        <a type="button" class="btn btn-primary"
-                          style="margin-bottom: 10px;background-color: #DB0D0D; border-color: #DB0D0D;" href="">
-                          Hủy
-                        </a>
+                        <a type="button" class="btn btn-danger"
+                          style="margin-bottom: 10px;"
+                         href="../function.php?idOrderCancel=<?php echo (int)$row_getOrdersNotSuccess['maDonHang']; ?>"
+                         onclick="return confirm('Bạn có chắc muốn hủy đơn này không?');">
+                              Hủy
+                                </a>
 
                       </td>
                     </tr>

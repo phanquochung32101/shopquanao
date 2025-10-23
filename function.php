@@ -69,6 +69,16 @@ if (isset($_GET['idOrderSuccess'])) {
 	mysqli_query($mysqli, $sql_loadSuccessOrder);
 	header("Location:admin/index.php?errCode=0");
 }
+if (isset($_GET['idOrderCancel'])) {
+  $id = (int)$_GET['idOrderCancel'];
+  $sql_cancel = "UPDATE donhang SET trangThaiDonHang='2' WHERE maDonHang='{$id}'";
+  if (mysqli_query($mysqli, $sql_cancel)) {
+    header("Location:admin/index.php?errCode=2");
+  } else {
+    header("Location:admin/index.php?errCode=1");
+  }
+  exit;
+}
 if (isset($_POST['fixProduct'])) {
 	$maSanPham = $_GET['id'];
 	$maDanhMuc = $_POST['maDanhMuc'];
@@ -241,9 +251,47 @@ if (isset($_GET['idDelete'])) {
 	mysqli_query($mysqli, $sql_deleteProduct);
 	header("location: admin/pages/product.php");
 }
+// XÓA DANH MỤC (Admin) – xóa SP thuộc DM trước, rồi xóa DM
 if (isset($_GET['deleteCategory'])) {
-	$maDanhMuc = $_GET['deleteCategory'];
-	$sql_deleteCategory = "DELETE FROM danhmuc WHERE maDanhMuc=$maDanhMuc";
-	mysqli_query($mysqli, $sql_deleteCategory);
-	header("location: admin/pages/category.php");
+    $maDanhMuc = (int)$_GET['deleteCategory'];
+
+    // Bắt đầu transaction (nếu MySQL hỗ trợ)
+    mysqli_begin_transaction($mysqli);
+
+    try {
+        // Xóa sản phẩm thuộc danh mục (tránh FK)
+        $ok1 = mysqli_query($mysqli, "DELETE FROM sanpham WHERE maDanhMuc = $maDanhMuc");
+
+        // Xóa danh mục
+        $ok2 = mysqli_query($mysqli, "DELETE FROM danhmuc WHERE maDanhMuc = $maDanhMuc");
+
+        if (!$ok1 || !$ok2) {
+            throw new Exception('Query failed');
+        }
+
+        mysqli_commit($mysqli);
+        header("Location: admin/pages/category.php?msg=deleted");
+    } catch (Exception $e) {
+        mysqli_rollback($mysqli);
+        header("Location: admin/pages/category.php?msg=error");
+    }
+    exit;
+}
+
+if (isset($_GET['deleteUser'])) {
+    $uid = (int)$_GET['deleteUser'];
+
+    // Xóa đơn hàng của khách (nếu bảng donhang có maKhachHang)
+    // Nếu DB của bạn có ràng buộc ON DELETE CASCADE thì có thể bỏ đoạn này.
+    $ok1 = mysqli_query($mysqli, "DELETE FROM donhang WHERE maKhachHang = $uid");
+
+    // Xóa khách hàng
+    $ok2 = mysqli_query($mysqli, "DELETE FROM khachhang WHERE maKhachHang = $uid");
+
+    if ($ok2) {
+        header("Location: admin/pages/users.php?msg=deleted");
+    } else {
+        header("Location: admin/pages/users.php?msg=error");
+    }
+    exit;
 }

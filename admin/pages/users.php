@@ -102,6 +102,12 @@ $query_getAllCus = mysqli_query($mysqli, $sql_getAllCus);
           <div class="row mb-2">
             <div class="col-sm-6">
               <h1>Quản lý khách hàng</h1>
+              <?php if (isset($_GET['msg'])): ?>
+              <div class="alert alert-<?php echo $_GET['msg']==='deleted' ? 'success' : 'danger'; ?>">
+              <?php echo $_GET['msg']==='deleted' ? 'Đã xóa khách hàng.' : 'Xóa khách hàng thất bại.'; ?>
+             </div>
+              <?php endif; ?>
+
             </div>
             <div class="col-sm-6">
               <ol class="breadcrumb float-sm-right">
@@ -160,11 +166,12 @@ $query_getAllCus = mysqli_query($mysqli, $sql_getAllCus);
                             <?php echo $row_getAllCus['ngayDangKi'] ?>
                           </td>
                           <td>
-                            <a style="float:left;" href="#" data-toggle="modal" data-target="#myModal"><button
-                                class="btn btn-primary">Sửa</button> </a>
-                            <a style="float: right;" href="#" data-toggle="modal" data-target="#myModal"><button
-                                style="background-color:red;border-color: red;" class="btn btn-primary">Xóa</button></a>
-                            </a>
+                         <a style="float:right;"
+                         href="../../function.php?deleteUser=<?php echo (int)$row_getAllCus['maKhachHang']; ?>"
+                         class="btn btn-danger"
+                          onclick="return confirm('Xóa khách hàng #<?php echo (int)$row_getAllCus['maKhachHang']; ?>? Hành động không thể hoàn tác.');">
+                             Xóa
+                           </a>
                           </td>
                         </tr>
                         <?php
@@ -211,7 +218,7 @@ $query_getAllCus = mysqli_query($mysqli, $sql_getAllCus);
     </div>
     <!-- /.content-wrapper -->
     <footer class="main-footer">
-      <<?php include("../footer.php") ?>
+      <?php include("../footer.php"); ?>
     </footer>
 
 

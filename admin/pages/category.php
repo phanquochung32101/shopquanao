@@ -33,7 +33,10 @@ $query_getAllCategory = mysqli_query($mysqli, $sql_getAllCategory);
   <link rel="stylesheet" href="../plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
   <!-- Theme style -->
   <link rel="stylesheet" href="../dist/css/adminlte.min.css">
-</head>
+</head> <style>
+  /* tránh xuống dòng và cố định bề rộng vừa phải cho ô hành động */
+  td.actions { white-space: nowrap; width: 120px; }
+</style>
 
 <body class="hold-transition sidebar-mini">
   <div class="wrapper">
@@ -104,6 +107,15 @@ $query_getAllCategory = mysqli_query($mysqli, $sql_getAllCategory);
           <div class="row mb-2">
             <div class="col-sm-6">
               <h1>Quản lý danh mục</h1>
+              <?php if (isset($_GET['msg'])): ?>
+  <div class="alert alert-<?php echo $_GET['msg']==='deleted' ? 'success' : 'danger'; ?> mt-2">
+    <?php
+      if ($_GET['msg'] === 'deleted') echo 'Đã xóa danh mục.';
+      elseif ($_GET['msg'] === 'error') echo 'Xóa danh mục thất bại.';
+    ?>
+  </div>
+<?php endif; ?>
+
             </div>
             <div class="col-sm-6">
               <ol class="breadcrumb float-sm-right">
@@ -162,14 +174,18 @@ $query_getAllCategory = mysqli_query($mysqli, $sql_getAllCategory);
                           <td>
                             <?php echo $row_getNameLevel['tenTrangThai'] ?>
                           </td>
-                          <td style="width: 110px; display: flex;">
-                            <a style="float:left;"
-                              href="actionCategory.php?id=<?php echo $row_getAllCategory['maDanhMuc'] ?>"><button
-                                class="btn btn-primary">Sửa</button> </a>
-                            <a style="float: right;" href="../../function.php?deleteCategory"><button
-                                style="background-color:red;border-color: red;" class="btn btn-primary">Xóa</button></a>
-                            </a>
-                          </td>
+                          <td class="actions text-center">
+                            <div class="btn-group btn-group-sm" role="group" aria-label="Tùy chỉnh">
+                          <a href="actionCategory.php?id=<?php echo (int)$row_getAllCategory['maDanhMuc']; ?>" 
+                              class="btn btn-primary">Sửa</a>
+                       <a href="../../function.php?deleteCategory=<?php echo (int)$row_getAllCategory['maDanhMuc']; ?>" 
+                      class="btn btn-danger"
+                       onclick="return confirm('Xóa danh mục #<?php echo (int)$row_getAllCategory['maDanhMuc']; ?>? Hành động không thể hoàn tác.');">
+                         Xóa
+                             </a>
+                     </div>
+                              </td>
+
                         </tr>
                         <?php
                       }
@@ -215,7 +231,7 @@ $query_getAllCategory = mysqli_query($mysqli, $sql_getAllCategory);
     </div>
     <!-- /.content-wrapper -->
     <footer class="main-footer">
-      <<?php include("../footer.php") ?>
+      <?php include("../footer.php") ?>
     </footer>
 
     <!-- Control Sidebar -->

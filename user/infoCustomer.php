@@ -421,11 +421,13 @@ if (isset($_GET['errCode'])) {
                                     </td>
                                     <td>
                                         <?php
-                                        if ($row_getAllOrder['trangThaiDonHang'] == 1) {
-                                            echo "Thành công";
-                                        } else {
-                                            echo "Đang chờ duyệt";
-                                        }
+                                         if ((int)$row_getAllOrder['trangThaiDonHang'] === 1) {
+                                                      echo "Thành công";
+                                            } elseif ((int)$row_getAllOrder['trangThaiDonHang'] === 0) {
+                                                       echo "Đang chờ duyệt";
+                                            } else { // 2 = đã hủy
+                                                      echo "Đã hủy";
+                                            }
                                         ?>
                                     </td>
 
