@@ -206,6 +206,22 @@ if (!function_exists('currency_format')) {
             </div>
             <!-- ./col -->
 
+<!-- Biểu đồ tổng quan (phía dưới đơn hàng) -->
+<div class="row">
+  <div class="col-12">
+    <div class="card" style="min-height: 420px;">
+      <div class="card-header">
+        <h3 class="card-title">Biểu đồ tổng quan</h3>
+      </div>
+      <div class="card-body" style="height: 380px;">
+        <canvas id="overviewChart" height="360"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /Biểu đồ tổng quan -->
+
+
             <div class="card-body">
               <h3 class="m-0">Đơn hàng chưa xác nhận</h3>
               <h4 style="text-align: center; color:red">
@@ -340,5 +356,67 @@ if (!function_exists('currency_format')) {
 
 
 </body>
+
+<!-- Chart.js (chỉ cần giữ 1 lần trong trang) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  // Lấy số liệu PHP đã tính sẵn
+  const metricNewOrder     = <?php echo (int)$newOrder; ?>;
+  const metricSuccessOrder = <?php echo (int)$successOrder; ?>;
+  const metricCustomers    = <?php echo (int)$getCus; ?>;
+  const metricRevenueVND   = <?php echo (int)$Money; ?>;
+
+  const ctx = document.getElementById('overviewChart').getContext('2d');
+
+  // Xoá chart cũ nếu có (tránh lỗi khi reload qua PJAX/partial)
+  if (window._overviewChart) {
+    window._overviewChart.destroy();
+  }
+
+  window._overviewChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Chờ xác nhận', 'Thành công', 'KH đã đăng kí', 'Doanh thu (đ)'],
+      datasets: [{
+        label: 'Giá trị',
+        data: [metricNewOrder, metricSuccessOrder, metricCustomers, metricRevenueVND],
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false, // cho phép phóng to theo chiều cao card-body
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              const isRevenue = ctx.dataIndex === 3;
+              const val = ctx.parsed.y || 0;
+              if (isRevenue) {
+                return ctx.label + ': ' + new Intl.NumberFormat('vi-VN').format(val) + ' đ';
+              }
+              return ctx.label + ': ' + val;
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: function(value) {
+              return new Intl.NumberFormat('vi-VN').format(value);
+            }
+          },
+          grid: { drawBorder: false }
+        },
+        x: {
+          grid: { display: false }
+        }
+      }
+    }
+  });
+</script>
 
 </html>
