@@ -30,6 +30,16 @@ if (isset($_GET['errCode'])) {
   }
 }
 
+if (!function_exists('payment_text')) {
+  function payment_text($v) {
+    $v = isset($v) ? (int)$v : 0;
+    if ($v === 1) return 'Thanh toán bằng thẻ';
+    if ($v === 2) return 'Thanh toán khi nhận hàng';
+    return 'Không rõ';
+  }
+}
+
+
 if (!function_exists('currency_format')) {
   function currency_format($number, $suffix = 'đ')
   {
@@ -210,6 +220,7 @@ if (!function_exists('currency_format')) {
                       <th>Mã khách hàng</th>
                       <th>Ghi chú</th>
                       <th>Tổng giá</th>
+                      <th>Phương thức</th>
                       <th>Giời gian tạo</th>
                       <th>Tùy chỉnh</th>
                     </tr>
@@ -236,6 +247,8 @@ if (!function_exists('currency_format')) {
                       <td>
                         <?php echo $row_getOrdersNotSuccess['tongGia'] ?>
                       </td>
+                      <td><?php echo payment_text($row_getOrdersNotSuccess['phuongThucThanhToan'] ?? 2); ?>
+                    </td>
                       <td>
                         <?php echo $row_getOrdersNotSuccess['thoiGian'] ?>
                       </td>

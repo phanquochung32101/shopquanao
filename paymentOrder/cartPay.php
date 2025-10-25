@@ -271,40 +271,41 @@ if (!function_exists('currency_format')) {
             </div>
         </div>
     </header>
-    <div class="row">
-        <form action="continue.php" method="POST">
-            <h3 style="text-align: center; padding-top: 20px;padding-bottom:10px">Thanh toán</h3>
-            <div class="col-md-15" style="display: flex;padding-left:60px">
-                <div class="delivery-details" style=" width: 50%">
-                    <h4 style="padding-left:150px">Nhập thông tin thẻ</h4>
-                    <div class="list-style">
-                        <input value="<?php echo $maKhachHang ?>" type="hidden" name="maKhachHang">
-                        <input value="<?php echo $tenKhachHang ?>" type="hidden" name="tenKhachHang">
-                        <input value="<?php echo $diaChi ?>" type="hidden" name="diaChi">
-                        <input value="<?php echo $soDienThoai ?>" type="hidden" name="soDienThoai">
-                        <div class="form-name">
-                            <label style="padding-right:20px">Ngân hàng<em>*</em>
-                            </label>
-                            <select name="nganHang">
-                                <option value="1">Agribank</option>
-                                <option value="1">VietComBank</option>
-                                <option value="1">TechcomBank</option>
-                                <option value="1">TPBank</option>
-                                <option value="1">...</option>
-                            </select>
-                        </div>
-                        <div class="form-name">
-                            <label style="padding-right:50px">Số Thẻ<em>*</em> </label>
-                            <input type="text" value="" name="diaChi" placeholder="5405 2052 5599 6">
-                        </div>
-                        <button type="submit" name="ContinueCartPay" class="check-button" style=" margin-top: 20px;">
-                            Thanh toán</button>
-                    </div>
-                </div>
+   <div class="row">
+    <form action="continue.php" method="POST">
+        <h3 style="text-align: center; padding-top: 20px; padding-bottom: 10px;">Thanh toán</h3>
 
+        <div class="col-md-15" style="display: flex; justify-content: center; align-items: center;">
+            <div class="delivery-details" style="width: 50%; text-align: center; background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+                <h4>Thông tin chuyển khoản tới cửa hàng</h4>
+
+                <div class="list-style" style="margin-top: 20px;">
+                    <input type="hidden" name="maKhachHang" value="<?php echo isset($maKhachHang) ? $maKhachHang : ''; ?>">
+                    <input type="hidden" name="tenKhachHang" value="<?php echo isset($tenKhachHang) ? $tenKhachHang : ''; ?>">
+                    <input type="hidden" name="diaChi" value="<?php echo isset($diaChi) ? $diaChi : ''; ?>">
+                    <input type="hidden" name="soDienThoai" value="<?php echo isset($soDienThoai) ? $soDienThoai : ''; ?>">
+
+                    <p><strong>Ngân hàng:</strong> MB Bank</p>
+                    <p><strong>Số tài khoản:</strong> 0334043054</p>
+                    <p><strong>Chủ tài khoản:</strong> PHAN QUOC HUNG</p>
+                    <p><strong>Nội dung chuyển khoản:</strong> Ghi mã đơn hàng (VD: ORD-20251025-0001)</p>
+
+                    <input type="hidden" name="shop_bank" value="MB Bank">
+                    <input type="hidden" name="shop_account" value="0334043054">
+                    <input type="hidden" name="shop_account_name" value="PHAN QUOC HUNG">
+                    <input type="hidden" name="payment_method" value="BANK_TRANSFER">
+                    
+
+                    <p style="margin-top:18px;">Sau khi chuyển khoản, vui lòng nhấn <strong>"Tôi đã chuyển"</strong> hoặc liên hệ <strong>0334043054</strong> để xác nhận.</p>
+
+                    <button type="submit" name="ContinueCartPay" class="check-button" style="margin-top: 20px;">Tôi đã chuyển - Xác nhận</button>
+                    <input type="hidden" name="payment" value="1">
+                </div>
             </div>
-        </form>
-    </div>
+        </div>
+    </form>
+</div>
+
     <!--  cart end-->
 
     <!--Sản phẩm mới -->

@@ -7,7 +7,11 @@ if (isset($_POST['Continue'])) {
               $tenKhachHang = $_POST['tenKhachHang'];
               $diaChi = $_POST['diaChi'];
               $soDienThoai = $_POST['soDienThoai'];
-              $phuongThucThanhToan = $_POST['payment'];
+              $phuongThucThanhToan = isset($_POST['payment']) ? (int)$_POST['payment'] : 2;
+if ($phuongThucThanhToan !== 1 && $phuongThucThanhToan !== 2) {
+    $phuongThucThanhToan = 2; // fallback COD nếu giá trị lạ/rỗng
+}
+
               $ThoiGianLap = date("Y-m-d H:i:s");
               $trangThaiDonHang = 0;
               $maNhanVien = 1;
@@ -31,8 +35,16 @@ if (isset($_POST['Continue'])) {
                                    }
                             }
                      }
-                     $sql_saveOrder = "INSERT INTO donhang(maKhachHang,maNhanVien,ghiChu,tongGia,thoiGian,trangThaiDonHang) VALUES('" . $maKhachHang . "','" . $maNhanVien . "','" . $ghiChu . "','" . $allAmount . "','" . $ThoiGianLap . "','" . $trangThaiDonHang . "')";
-                     mysqli_query($mysqli, $sql_saveOrder);
+                     $sql_saveOrder = "INSERT INTO donhang(
+        maKhachHang, maNhanVien, ghiChu, tongGia, thoiGian, trangThaiDonHang, phuongThucThanhToan
+    ) VALUES (
+        '".$maKhachHang."', '".$maNhanVien."', '".$ghiChu."', '".$allAmount."', '".$ThoiGianLap."', '".$trangThaiDonHang."', '".$phuongThucThanhToan."'
+    )";
+mysqli_query($mysqli, $sql_saveOrder);
+
+// Lấy id đơn hàng an toàn hơn (tránh SELECT theo thời gian)
+$maDonHang = mysqli_insert_id($mysqli);
+
                      $sql_getOrder = "SELECT * FROM donhang WHERE thoiGian='" . $ThoiGianLap . "' LIMIT 1";
                      $query_getOrder = mysqli_query($mysqli, $sql_getOrder);
                      $row_getOrder = mysqli_fetch_array($query_getOrder);
@@ -61,7 +73,11 @@ if (isset($_POST['Continue'])) {
        $tenKhachHang = $_POST['tenKhachHang'];
        $diaChi = $_POST['diaChi'];
        $soDienThoai = $_POST['soDienThoai'];
-       $phuongThucThanhToan = $_POST['payment'];
+       $phuongThucThanhToan = isset($_POST['payment']) ? (int)$_POST['payment'] : 2;
+if ($phuongThucThanhToan !== 1 && $phuongThucThanhToan !== 2) {
+    $phuongThucThanhToan = 2; // fallback COD nếu giá trị lạ/rỗng
+}
+
        $ThoiGianLap = date("Y-m-d H:i:s");
        $trangThaiDonHang = 0;
        $maNhanVien = 1;
@@ -82,8 +98,14 @@ if (isset($_POST['Continue'])) {
                      }
               }
        }
-       $sql_saveOrder = "INSERT INTO donhang(maKhachHang,maNhanVien,ghiChu,tongGia,thoiGian,trangThaiDonHang) VALUES('" . $maKhachHang . "','" . $maNhanVien . "','" . $ghiChu . "','" . $allAmount . "','" . $ThoiGianLap . "','" . $trangThaiDonHang . "')";
-       mysqli_query($mysqli, $sql_saveOrder);
+       $sql_saveOrder = "INSERT INTO donhang(
+        maKhachHang, maNhanVien, ghiChu, tongGia, thoiGian, trangThaiDonHang, phuongThucThanhToan
+    ) VALUES (
+        '".$maKhachHang."', '".$maNhanVien."', '".$ghiChu."', '".$allAmount."', '".$ThoiGianLap."', '".$trangThaiDonHang."', '".$phuongThucThanhToan."'
+    )";
+mysqli_query($mysqli, $sql_saveOrder);
+$maDonHang = mysqli_insert_id($mysqli);
+
        $sql_getOrder = "SELECT * FROM donhang WHERE thoiGian='" . $ThoiGianLap . "' LIMIT 1";
        $query_getOrder = mysqli_query($mysqli, $sql_getOrder);
        $row_getOrder = mysqli_fetch_array($query_getOrder);
