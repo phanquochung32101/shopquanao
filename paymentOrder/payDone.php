@@ -3,8 +3,11 @@ include("../conection.php");
 session_start();
 
 if (!isset($_SESSION['maKhachHang'])) {
-    header("location: ../user/login.php");
+    header("location: ../user/login.php"); exit;
 }
+
+$orderId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+
 //Thong tin khach hang
 $sql_InfoCustomer = "SELECT * FROM khachhang WHERE maKhachHang='" . $_SESSION['maKhachHang'] . "' LIMIT 1";
 $query_InfoCustomer = mysqli_query($mysqli, $sql_InfoCustomer);
@@ -34,15 +37,31 @@ $query_getCategory = mysqli_query($mysqli, $sql_getCategory);
 $sql_getCategoryMobile = "SELECT * FROM danhmuc ORDER BY maDanhMuc DESC ";
 $query_getCategoryMobile = mysqli_query($mysqli, $sql_getCategoryMobile);
 //currrency  format vnd
+$rowOrder = null;
+if ($orderId > 0) {
+    $maKhachHang = (int)$_SESSION['maKhachHang'];
+    $sql = "SELECT * FROM donhang WHERE maDonHang = {$orderId} AND maKhachHang = {$maKhachHang} LIMIT 1";
+    $q = mysqli_query($mysqli, $sql);
+    $rowOrder = mysqli_fetch_assoc($q);
+}
+
+//currrency  format vnd
 if (!function_exists('currency_format')) {
-    function currency_format($number, $suffix = 'đ')
-    {
-        if (!empty($number)) {
-            return number_format($number, 0, ',', '.') . "{$suffix}";
+    function currency_format($number, $suffix = 'đ') {
+        if ($number !== null && $number !== '') {
+            return number_format((float)$number, 0, ',', '.') . "{$suffix}";
         }
+        return '0' . $suffix;
     }
 }
 
+// Text phương thức thanh toán
+function payment_text($v) {
+    $v = isset($v) ? (int)$v : 0;
+    if ($v === 1) return 'Thanh toán bằng thẻ';
+    if ($v === 2) return 'Thanh toán khi nhận hàng';
+    return 'Không rõ';
+}
 ?>
 
 <!doctype html>
@@ -253,14 +272,22 @@ if (!function_exists('currency_format')) {
         </div>
     </header>
     <div class="row">
-
-        <h3 style="text-align: center; padding-top: 20px;padding-bottom:10px">Chờ xác nhận</h3>
-        <div class="modal-body" style="text-align: center;">
-            <h5>Đơn hàng của bạn đã hoàn tất mã đơn hàng của bạn là : <?php echo $_GET['id'] ?> ,vui lòng đợi xác nhận đơn hàng nhé</h5>
-            <a type="submit" class="btn btn-info"
-                href="../index.php">Quay lại trang chủ</a>
-        </div>
+    <h3 style="text-align: center; padding-top: 20px;padding-bottom:10px">Chờ xác nhận</h3>
+    <div class="modal-body" style="text-align: center;">
+        <?php if ($rowOrder) { ?>
+            <h5>
+                Đơn hàng của bạn đã hoàn tất.
+                Mã đơn hàng của bạn là: <strong>#<?php echo (int)$orderId; ?></strong>.
+                Vui lòng đợi cửa hàng xác nhận.
+            </h5>
+            <p>Tổng tiền: <strong><?php echo currency_format($rowOrder['tongGia']); ?></strong></p>
+            <p>Phương thức: <strong><?php echo payment_text($rowOrder['phuongThucThanhToan'] ?? 2); ?></strong></p>
+        <?php } else { ?>
+            <h5>Không tìm thấy thông tin đơn hàng hoặc bạn không có quyền xem đơn này.</h5>
+        <?php } ?>
+        <a type="submit" class="btn btn-info" href="../index.php">Quay lại trang chủ</a>
     </div>
+</div>
     <!--  cart end-->
 
     <!--Sản phẩm mới -->

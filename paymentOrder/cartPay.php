@@ -272,7 +272,7 @@ if (!function_exists('currency_format')) {
         </div>
     </header>
    <div class="row">
-    <form action="continue.php" method="POST">
+    <form action="continueCartPay.php" method="POST">
         <h3 style="text-align: center; padding-top: 20px; padding-bottom: 10px;">Thanh toán</h3>
 
         <div class="col-md-15" style="display: flex; justify-content: center; align-items: center;">
