@@ -1,13 +1,25 @@
 <?php
 include("../../conection.php");
 session_start();
-if (!isset($_SESSION['maQuanLy'])) {
-  header('location:login.php');
+// Cho phép admin hoặc nhân viên
+if (!isset($_SESSION['maQuanLy']) && !isset($_SESSION['maNhanVien'])) {
+  header('location:../login.php');
+  exit;
 }
-$id = $_SESSION['maQuanLy'];
-$sql_quanly = "SELECT * FROM quanly WHERE maQuanLy = $id LIMIT 1";
-$query_quanly = mysqli_query($mysqli, $sql_quanly);
-$row_quanly = mysqli_fetch_array($query_quanly);
+
+if (isset($_SESSION['maQuanLy'])) {
+  $id = (int)$_SESSION['maQuanLy'];
+  $sql_quanly = "SELECT * FROM quanly WHERE maQuanLy = $id LIMIT 1";
+  $query_quanly = mysqli_query($mysqli, $sql_quanly);
+  $row_quanly = mysqli_fetch_array($query_quanly);
+} else {
+  $id = (int)$_SESSION['maNhanVien'];
+  $sql_nv = "SELECT * FROM nhanvien WHERE maNhanVien = $id LIMIT 1";
+  $query_nv = mysqli_query($mysqli, $sql_nv);
+  $row_nv = mysqli_fetch_array($query_nv);
+  $row_quanly = array();
+  $row_quanly['tenQuanLy'] = isset($row_nv['tenNhanVien']) ? $row_nv['tenNhanVien'] : 'Nhân viên';
+}
 
 
 $sql_getAllCategory = "SELECT * FROM danhmuc ORDER By maDanhMuc DESC";
@@ -33,9 +45,13 @@ $query_getAllCategory = mysqli_query($mysqli, $sql_getAllCategory);
   <link rel="stylesheet" href="../plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
   <!-- Theme style -->
   <link rel="stylesheet" href="../dist/css/adminlte.min.css">
-</head> <style>
+</head>
+<style>
   /* tránh xuống dòng và cố định bề rộng vừa phải cho ô hành động */
-  td.actions { white-space: nowrap; width: 120px; }
+  td.actions {
+    white-space: nowrap;
+    width: 120px;
+  }
 </style>
 
 <body class="hold-transition sidebar-mini">
@@ -44,66 +60,7 @@ $query_getAllCategory = mysqli_query($mysqli, $sql_getAllCategory);
     <?php include("navbar.php"); ?>
     <!-- /.navbar -->
 
-    <!-- Main Sidebar Container -->
-    <aside class="main-sidebar sidebar-dark-primary elevation-4">
-      <!-- Brand Logo -->
-      <a href="../index.php" class="brand-link">
-        <img src="../dist/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3"
-          style="opacity: .8">
-        <span class="brand-text font-weight-light" style="font-size:17px;">
-          <?php echo $row_quanly['tenQuanLy'] ?>
-        </span>
-      </a>
-      <!-- Sidebar -->
-      <div class="sidebar">
-
-
-        <!-- Sidebar Menu -->
-        <nav class="mt-2">
-          <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-            <a href="../index.php" class="nav-link">
-              <i class="nav-icon fas fa-tachometer-alt"></i>
-              <p>
-                Thống Kê
-              </p>
-            </a>
-            <a href="product.php" class="nav-link ">
-              <i class="nav-icon fas fa-th"></i>
-              <p>
-                Quản Lý Sản Phẩm
-              </p>
-            </a>
-            <a href="category.php" class="nav-link active">
-              <i class="nav-icon fas fa-table"></i>
-              <p>
-                Quản Lý Danh Mục
-              </p>
-            </a>
-            <a href="bills.php" class="nav-link ">
-              <i class="nav-icon fas fa-book"></i>
-              <p>
-                Quản Lý Hóa Đơn
-              </p>
-            </a>
-
-            <a href="users.php" class="nav-link">
-              <i class="nav-icon fas fa-users"></i>
-              <p>
-                Quản Lý Khách Hàng
-              </p>
-            </a>
-
-            <a href="suggestsupport.php" class="nav-link">
-               <i class="nav-icon fas fa-life-ring"></i>
-                <p>Quản Lý Hỗ Trợ</p>
-               </a>
-
-        </nav>
-        <!-- /.sidebar-menu -->
-      </div>
-      <!-- /.sidebar -->
-    </aside>
-
+    <?php include("../menu.php"); ?>
     <!-- Content Wrapper. Contains page content -->
     <div class="content-wrapper">
       <!-- Content Header (Page header) -->
@@ -113,13 +70,13 @@ $query_getAllCategory = mysqli_query($mysqli, $sql_getAllCategory);
             <div class="col-sm-6">
               <h1>Quản lý danh mục</h1>
               <?php if (isset($_GET['msg'])): ?>
-  <div class="alert alert-<?php echo $_GET['msg']==='deleted' ? 'success' : 'danger'; ?> mt-2">
-    <?php
-      if ($_GET['msg'] === 'deleted') echo 'Đã xóa danh mục.';
-      elseif ($_GET['msg'] === 'error') echo 'Xóa danh mục thất bại.';
-    ?>
-  </div>
-<?php endif; ?>
+                <div class="alert alert-<?php echo $_GET['msg'] === 'deleted' ? 'success' : 'danger'; ?> mt-2">
+                  <?php
+                  if ($_GET['msg'] === 'deleted') echo 'Đã xóa danh mục.';
+                  elseif ($_GET['msg'] === 'error') echo 'Xóa danh mục thất bại.';
+                  ?>
+                </div>
+              <?php endif; ?>
 
             </div>
             <div class="col-sm-6">
@@ -162,7 +119,7 @@ $query_getAllCategory = mysqli_query($mysqli, $sql_getAllCategory);
                         $sql_getNameLevel = "SELECT tenTrangThai,maTrangThai FROM trangthaisanpham WHERE maTrangThai='" . $row_getAllCategory['trangThaiSanPham'] . "' LIMIT 1";
                         $query_getNameLevel = mysqli_query($mysqli, $sql_getNameLevel);
                         $row_getNameLevel = mysqli_fetch_array($query_getNameLevel);
-                        ?>
+                      ?>
                         <tr>
                           <td>
                             <?php echo $i ?>
@@ -181,18 +138,18 @@ $query_getAllCategory = mysqli_query($mysqli, $sql_getAllCategory);
                           </td>
                           <td class="actions text-center">
                             <div class="btn-group btn-group-sm" role="group" aria-label="Tùy chỉnh">
-                          <a href="actionCategory.php?id=<?php echo (int)$row_getAllCategory['maDanhMuc']; ?>" 
-                              class="btn btn-primary">Sửa</a>
-                       <a href="../../function.php?deleteCategory=<?php echo (int)$row_getAllCategory['maDanhMuc']; ?>" 
-                      class="btn btn-danger"
-                       onclick="return confirm('Xóa danh mục #<?php echo (int)$row_getAllCategory['maDanhMuc']; ?>? Hành động không thể hoàn tác.');">
-                         Xóa
-                             </a>
-                     </div>
-                              </td>
+                              <a href="actionCategory.php?id=<?php echo (int)$row_getAllCategory['maDanhMuc']; ?>"
+                                class="btn btn-primary">Sửa</a>
+                              <a href="../../function.php?deleteCategory=<?php echo (int)$row_getAllCategory['maDanhMuc']; ?>"
+                                class="btn btn-danger"
+                                onclick="return confirm('Xóa danh mục #<?php echo (int)$row_getAllCategory['maDanhMuc']; ?>? Hành động không thể hoàn tác.');">
+                                Xóa
+                              </a>
+                            </div>
+                          </td>
 
                         </tr>
-                        <?php
+                      <?php
                       }
                       ?>
                     </tbody>

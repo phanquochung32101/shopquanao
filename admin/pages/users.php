@@ -46,7 +46,13 @@ $query_getAllCus = mysqli_query($mysqli, $sql_getAllCus);
         <img src="../dist/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3"
           style="opacity: .8">
         <span class="brand-text font-weight-light" style="font-size:17px;">
-          <?php echo $row_quanly['tenQuanLy'] ?>
+          <?php
+          if (isset($_SESSION['maNhanVien']) && !empty($_SESSION['tenNhanVien'])) {
+            echo htmlspecialchars($_SESSION['tenNhanVien'], ENT_QUOTES, 'UTF-8');
+          } else {
+            echo htmlspecialchars($row_quanly['tenQuanLy'] ?? '', ENT_QUOTES, 'UTF-8');
+          }
+          ?>
         </span>
       </a>
       <!-- Sidebar -->
@@ -88,10 +94,17 @@ $query_getAllCus = mysqli_query($mysqli, $sql_getAllCus);
               </p>
             </a>
 
+            <a href="employee.php" class="nav-link">
+              <i class="nav-icon fas fa-user-tie"></i>
+              <p>
+                Quản Lý Nhân Viên
+              </p>
+            </a>
+
             <a href="suggestsupport.php" class="nav-link">
-               <i class="nav-icon fas fa-life-ring"></i>
-                <p>Quản Lý Hỗ Trợ</p>
-              </a>
+              <i class="nav-icon fas fa-life-ring"></i>
+              <p>Quản Lý Hỗ Trợ</p>
+            </a>
 
         </nav>
         <!-- /.sidebar-menu -->
@@ -108,9 +121,9 @@ $query_getAllCus = mysqli_query($mysqli, $sql_getAllCus);
             <div class="col-sm-6">
               <h1>Quản lý khách hàng</h1>
               <?php if (isset($_GET['msg'])): ?>
-              <div class="alert alert-<?php echo $_GET['msg']==='deleted' ? 'success' : 'danger'; ?>">
-              <?php echo $_GET['msg']==='deleted' ? 'Đã xóa khách hàng.' : 'Xóa khách hàng thất bại.'; ?>
-             </div>
+                <div class="alert alert-<?php echo $_GET['msg'] === 'deleted' ? 'success' : 'danger'; ?>">
+                  <?php echo $_GET['msg'] === 'deleted' ? 'Đã xóa khách hàng.' : 'Xóa khách hàng thất bại.'; ?>
+                </div>
               <?php endif; ?>
 
             </div>
@@ -150,7 +163,7 @@ $query_getAllCus = mysqli_query($mysqli, $sql_getAllCus);
                       while ($row_getAllCus = mysqli_fetch_array($query_getAllCus)) {
 
 
-                        ?>
+                      ?>
                         <tr>
                           <td>
                             <?php echo $row_getAllCus['maKhachHang'] ?>
@@ -171,15 +184,15 @@ $query_getAllCus = mysqli_query($mysqli, $sql_getAllCus);
                             <?php echo $row_getAllCus['ngayDangKi'] ?>
                           </td>
                           <td>
-                         <a style="float:right;"
-                         href="../../function.php?deleteUser=<?php echo (int)$row_getAllCus['maKhachHang']; ?>"
-                         class="btn btn-danger"
-                          onclick="return confirm('Xóa khách hàng #<?php echo (int)$row_getAllCus['maKhachHang']; ?>? Hành động không thể hoàn tác.');">
-                             Xóa
-                           </a>
+                            <a style="float:right;"
+                              href="../../function.php?deleteUser=<?php echo (int)$row_getAllCus['maKhachHang']; ?>"
+                              class="btn btn-danger"
+                              onclick="return confirm('Xóa khách hàng #<?php echo (int)$row_getAllCus['maKhachHang']; ?>? Hành động không thể hoàn tác.');">
+                              Xóa
+                            </a>
                           </td>
                         </tr>
-                        <?php
+                      <?php
                       }
                       ?>
                     </tbody>

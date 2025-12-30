@@ -46,7 +46,13 @@ $query_getAllOrders = mysqli_query($mysqli, $sql_getAllOrders);
         <img src="../dist/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3"
           style="opacity: .8">
         <span class="brand-text font-weight-light" style="font-size:17px;">
-          <?php echo $row_quanly['tenQuanLy'] ?>
+          <?php
+          if (isset($_SESSION['maNhanVien']) && !empty($_SESSION['tenNhanVien'])) {
+            echo htmlspecialchars($_SESSION['tenNhanVien'], ENT_QUOTES, 'UTF-8');
+          } else {
+            echo htmlspecialchars($row_quanly['tenQuanLy'] ?? '', ENT_QUOTES, 'UTF-8');
+          }
+          ?>
         </span>
 
       </a>
@@ -89,10 +95,17 @@ $query_getAllOrders = mysqli_query($mysqli, $sql_getAllOrders);
               </p>
             </a>
 
+              <a href="employee.php" class="nav-link">
+              <i class="nav-icon fas fa-user-tie"></i>
+              <p>
+                Quản Lý Nhân Viên
+              </p>
+            </a>
+
             <a href="suggestsupport.php" class="nav-link">
-             <i class="nav-icon fas fa-life-ring"></i>
-               <p>Quản Lý Hỗ Trợ</p>
-              </a>
+              <i class="nav-icon fas fa-life-ring"></i>
+              <p>Quản Lý Hỗ Trợ</p>
+            </a>
 
         </nav>
         <!-- /.sidebar-menu -->
@@ -158,7 +171,7 @@ $query_getAllOrders = mysqli_query($mysqli, $sql_getAllOrders);
                       $i = 0;
                       while ($row_getAllOrders = mysqli_fetch_array($query_getAllOrders)) {
                         $i++;
-                        ?>
+                      ?>
                         <tr>
                           <td>
                             <?php echo $i ?>
@@ -188,7 +201,7 @@ $query_getAllOrders = mysqli_query($mysqli, $sql_getAllOrders);
 
                         </tr>
 
-                        <?php
+                      <?php
                       }
                       ?>
 
@@ -221,7 +234,7 @@ $query_getAllOrders = mysqli_query($mysqli, $sql_getAllOrders);
                               ?>
                               <?php
                               while ($row_getOrderDetail = mysqli_fetch_array($query_getOrderDetail)) {
-                                ?>
+                              ?>
                                 <tr>
                                   <td>
                                     <?php echo $row_getOrderDetail['maSanPham'] ?>
@@ -236,7 +249,7 @@ $query_getAllOrders = mysqli_query($mysqli, $sql_getAllOrders);
                                     <?php echo $row_getOrderDetail['giaSanPham'] ?>
                                   </td>
                                 </tr>
-                                <?php
+                              <?php
                               }
                               ?>
                             </tbody>
@@ -269,13 +282,13 @@ $query_getAllOrders = mysqli_query($mysqli, $sql_getAllOrders);
     <!-- /.content-wrapper -->
     <footer class="main-footer">
       <<?php include("../footer.php") ?>
-    </footer>
+        </footer>
 
-    <!-- Control Sidebar -->
-    <aside class="control-sidebar control-sidebar-dark">
-      <!-- Control sidebar content goes here -->
-    </aside>
-    <!-- /.control-sidebar -->
+        <!-- Control Sidebar -->
+        <aside class="control-sidebar control-sidebar-dark">
+          <!-- Control sidebar content goes here -->
+        </aside>
+        <!-- /.control-sidebar -->
   </div>
   <!-- ./wrapper -->
 

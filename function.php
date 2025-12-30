@@ -25,7 +25,6 @@ function emailValid($email)
 function phoneNumberValid($phoneNumber)
 {
 	return preg_match('/^[0-9]{10}+$/', $phoneNumber);
-
 }
 function checkRegister($allName, $userName, $userPassword, $passwordRepeat, $address, $email, $phoneNumber, $NgayDangKi)
 {
@@ -60,8 +59,6 @@ if (isset($_POST['fixCus'])) {
 	} else {
 		header("Location:user/infoCustomer.php?errCode=1");
 	}
-
-
 }
 
 if (isset($_GET['idOrderSuccess'])) {
@@ -70,14 +67,14 @@ if (isset($_GET['idOrderSuccess'])) {
 	header("Location:admin/index.php?errCode=0");
 }
 if (isset($_GET['idOrderCancel'])) {
-  $id = (int)$_GET['idOrderCancel'];
-  $sql_cancel = "UPDATE donhang SET trangThaiDonHang='2' WHERE maDonHang='{$id}'";
-  if (mysqli_query($mysqli, $sql_cancel)) {
-    header("Location:admin/index.php?errCode=2");
-  } else {
-    header("Location:admin/index.php?errCode=1");
-  }
-  exit;
+	$id = (int)$_GET['idOrderCancel'];
+	$sql_cancel = "UPDATE donhang SET trangThaiDonHang='2' WHERE maDonHang='{$id}'";
+	if (mysqli_query($mysqli, $sql_cancel)) {
+		header("Location:admin/index.php?errCode=2");
+	} else {
+		header("Location:admin/index.php?errCode=1");
+	}
+	exit;
 }
 if (isset($_POST['fixProduct'])) {
 	$maSanPham = $_GET['id'];
@@ -94,7 +91,6 @@ if (isset($_POST['fixProduct'])) {
 		mysqli_query($mysqli, $sql_fixProduct);
 		header("location: admin/pages/product.php");
 	}
-
 }
 
 if (isset($_POST['fixCategory'])) {
@@ -109,7 +105,6 @@ if (isset($_POST['fixCategory'])) {
 		mysqli_query($mysqli, $sql_fixCategory);
 		header("location: admin/pages/category.php");
 	}
-
 }
 if (isset($_POST['addCategory'])) {
 	$tenDanhMuc = $_POST['tenDanhMuc'];
@@ -118,7 +113,6 @@ if (isset($_POST['addCategory'])) {
 	$sql_addCategory = "INSERT INTO danhmuc(tenDanhMuc,moTa,trangThaiSanPham) VALUES('" . $tenDanhMuc . "','" . $moTa . "','" . $trangThaiSanPham . "')";
 	mysqli_query($mysqli, $sql_addCategory);
 	header("location: admin/pages/category.php");
-
 }
 
 if (isset($_POST['button-login-admin'])) {
@@ -145,12 +139,32 @@ if (isset($_POST['button-login-admin'])) {
 			header("location: admin/login.php?errCode=2");
 		}
 	}
-
 }
 if (isset($_POST['logout-admin'])) {
+	// Log out for both admin and employee; redirect to the appropriate login page
 	session_start();
+	$isEmployee = isset($_SESSION['maNhanVien']);
+	// clear session
+	$_SESSION = array();
+	if (ini_get("session.use_cookies")) {
+		$params = session_get_cookie_params();
+		setcookie(
+			session_name(),
+			'',
+			time() - 42000,
+			$params["path"],
+			$params["domain"],
+			$params["secure"],
+			$params["httponly"]
+		);
+	}
 	session_destroy();
-	header("location:admin/index.php");
+	if ($isEmployee) {
+		header("Location:nhanvien/login.php");
+	} else {
+		header("Location:admin/login.php");
+	}
+	exit;
 }
 if (isset($_POST['register-button'])) {
 	include("conection.php");
@@ -209,40 +223,39 @@ if (isset($_GET['logout-user'])) {
 		unset($_SESSION['maKhachHang']);
 		header("location:user/login.php");
 	}
-
 }
 if (isset($_POST['addProduct'])) {
-    // Lấy thông tin sản phẩm từ form
-    $maDanhMuc = $_POST['maDanhMuc'];
-    $tenSanPham = $_POST['tenSanPham'];
-    $moTa = $_POST['moTa'];
-    $soLuong = $_POST['soLuong'];
-    $trangThaiSanPham = $_POST['maTrangThai'];
-    $giaBan = $_POST['giaBan'];
+	// Lấy thông tin sản phẩm từ form
+	$maDanhMuc = $_POST['maDanhMuc'];
+	$tenSanPham = $_POST['tenSanPham'];
+	$moTa = $_POST['moTa'];
+	$soLuong = $_POST['soLuong'];
+	$trangThaiSanPham = $_POST['maTrangThai'];
+	$giaBan = $_POST['giaBan'];
 	$image = $_POST['image'];
-    if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-        $image = $_FILES['image']; // Lấy thông tin về file hình ảnh
-        $imageTmpName = $image['tmp_name']; // Lấy đường dẫn tạm thời của hình ảnh
+	if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+		$image = $_FILES['image']; // Lấy thông tin về file hình ảnh
+		$imageTmpName = $image['tmp_name']; // Lấy đường dẫn tạm thời của hình ảnh
 
-        // Thư mục để lưu trữ hình ảnh
-        $targetDirectory = "image/product/";
+		// Thư mục để lưu trữ hình ảnh
+		$targetDirectory = "image/product/";
 
-        // Tạo tên tệp tin mới để tránh trùng lặp tên
-        $imageExtension = pathinfo($image['name'], PATHINFO_EXTENSION); // Lấy phần mở rộng của hình ảnh
-        $newImageName = uniqid('image_') . '.' . $imageExtension; // Tạo tên tệp tin mới
+		// Tạo tên tệp tin mới để tránh trùng lặp tên
+		$imageExtension = pathinfo($image['name'], PATHINFO_EXTENSION); // Lấy phần mở rộng của hình ảnh
+		$newImageName = uniqid('image_') . '.' . $imageExtension; // Tạo tên tệp tin mới
 
 		$uploadPath = __DIR__ . '/' . $targetDirectory . $newImageName;
 		move_uploaded_file($imageTmpName, $uploadPath);
 
-        // Thêm thông tin sản phẩm vào cơ sở dữ liệu, sử dụng $uploadPath là đường dẫn tới hình ảnh đã lưu
-        $sql_addProduct = "INSERT INTO sanpham(maDanhMuc,tenSanPham,moTa,soLuong,trangThaiSanPham,hinhAnh,giaBan) VALUES('$maDanhMuc','$tenSanPham','$moTa','$soLuong','$trangThaiSanPham','$newImageName','$giaBan')";
-        mysqli_query($mysqli, $sql_addProduct);
-        header("location: admin/pages/product.php");
-    } else {
-        // Xử lý khi không có tệp được tải lên
-        // Hiển thị thông báo lỗi hoặc xử lý tùy theo yêu cầu của bạn
-        echo "Vui lòng chọn một hình ảnh để tải lên.";
-    }
+		// Thêm thông tin sản phẩm vào cơ sở dữ liệu, sử dụng $uploadPath là đường dẫn tới hình ảnh đã lưu
+		$sql_addProduct = "INSERT INTO sanpham(maDanhMuc,tenSanPham,moTa,soLuong,trangThaiSanPham,hinhAnh,giaBan) VALUES('$maDanhMuc','$tenSanPham','$moTa','$soLuong','$trangThaiSanPham','$newImageName','$giaBan')";
+		mysqli_query($mysqli, $sql_addProduct);
+		header("location: admin/pages/product.php");
+	} else {
+		// Xử lý khi không có tệp được tải lên
+		// Hiển thị thông báo lỗi hoặc xử lý tùy theo yêu cầu của bạn
+		echo "Vui lòng chọn một hình ảnh để tải lên.";
+	}
 }
 
 if (isset($_GET['idDelete'])) {
@@ -253,45 +266,87 @@ if (isset($_GET['idDelete'])) {
 }
 // XÓA DANH MỤC (Admin) – xóa SP thuộc DM trước, rồi xóa DM
 if (isset($_GET['deleteCategory'])) {
-    $maDanhMuc = (int)$_GET['deleteCategory'];
+	$maDanhMuc = (int)$_GET['deleteCategory'];
 
-    // Bắt đầu transaction (nếu MySQL hỗ trợ)
-    mysqli_begin_transaction($mysqli);
+	// Bắt đầu transaction (nếu MySQL hỗ trợ)
+	mysqli_begin_transaction($mysqli);
 
-    try {
-        // Xóa sản phẩm thuộc danh mục (tránh FK)
-        $ok1 = mysqli_query($mysqli, "DELETE FROM sanpham WHERE maDanhMuc = $maDanhMuc");
+	try {
+		// Xóa sản phẩm thuộc danh mục (tránh FK)
+		$ok1 = mysqli_query($mysqli, "DELETE FROM sanpham WHERE maDanhMuc = $maDanhMuc");
 
-        // Xóa danh mục
-        $ok2 = mysqli_query($mysqli, "DELETE FROM danhmuc WHERE maDanhMuc = $maDanhMuc");
+		// Xóa danh mục
+		$ok2 = mysqli_query($mysqli, "DELETE FROM danhmuc WHERE maDanhMuc = $maDanhMuc");
 
-        if (!$ok1 || !$ok2) {
-            throw new Exception('Query failed');
-        }
+		if (!$ok1 || !$ok2) {
+			throw new Exception('Query failed');
+		}
 
-        mysqli_commit($mysqli);
-        header("Location: admin/pages/category.php?msg=deleted");
-    } catch (Exception $e) {
-        mysqli_rollback($mysqli);
-        header("Location: admin/pages/category.php?msg=error");
-    }
-    exit;
+		mysqli_commit($mysqli);
+		header("Location: admin/pages/category.php?msg=deleted");
+	} catch (Exception $e) {
+		mysqli_rollback($mysqli);
+		header("Location: admin/pages/category.php?msg=error");
+	}
+	exit;
 }
 
 if (isset($_GET['deleteUser'])) {
-    $uid = (int)$_GET['deleteUser'];
+	$uid = (int)$_GET['deleteUser'];
 
-    // Xóa đơn hàng của khách (nếu bảng donhang có maKhachHang)
-    // Nếu DB của bạn có ràng buộc ON DELETE CASCADE thì có thể bỏ đoạn này.
-    $ok1 = mysqli_query($mysqli, "DELETE FROM donhang WHERE maKhachHang = $uid");
+	// Xóa đơn hàng của khách (nếu bảng donhang có maKhachHang)
+	// Nếu DB của bạn có ràng buộc ON DELETE CASCADE thì có thể bỏ đoạn này.
+	$ok1 = mysqli_query($mysqli, "DELETE FROM donhang WHERE maKhachHang = $uid");
 
-    // Xóa khách hàng
-    $ok2 = mysqli_query($mysqli, "DELETE FROM khachhang WHERE maKhachHang = $uid");
+	// Xóa khách hàng
+	$ok2 = mysqli_query($mysqli, "DELETE FROM khachhang WHERE maKhachHang = $uid");
 
-    if ($ok2) {
-        header("Location: admin/pages/users.php?msg=deleted");
-    } else {
-        header("Location: admin/pages/users.php?msg=error");
-    }
-    exit;
+	if ($ok2) {
+		header("Location: admin/pages/users.php?msg=deleted");
+	} else {
+		header("Location: admin/pages/users.php?msg=error");
+	}
+	exit;
+}
+
+
+
+// ==================== LOGIN NHÂN VIÊN ====================
+if (isset($_POST['employee-button-login'])) {
+	session_start();
+
+	$userName = $_POST['user-name'];
+	$userPassword = $_POST['user-password'];
+
+	if (!empty($userName) && !empty($userPassword)) {
+
+		$sql_login = mysqli_query($mysqli, "
+            SELECT * FROM nhanvien 
+            WHERE tenDangNhap = '$userName' 
+              AND matKhau = '$userPassword'
+              AND trangThaiTaiKhoan = 1
+            LIMIT 1
+        ");
+
+		if (mysqli_num_rows($sql_login) > 0) {
+			$row = mysqli_fetch_assoc($sql_login);
+
+			// ===== SESSION CHUNG =====
+			$_SESSION['role'] = 'employee';
+
+			// ===== SESSION RIÊNG NHÂN VIÊN =====
+			$_SESSION['maNhanVien'] = $row['maNhanVien'];
+			$_SESSION['tenNhanVien'] = $row['tenNhanVien'];
+			$_SESSION['emailNhanVien'] = $row['email'];
+			$_SESSION['maLoaiCongViec'] = $row['maLoaiCongViec'];
+
+			// Sau khi nhân viên login thành công, chuyển về trang admin chính
+			header("Location:admin/index.php");
+			exit;
+		} else {
+			header("Location: nhanvien/login.php?errCode=2");
+		}
+	} else {
+		header("Location: nhanvien/login.php?errCode=1");
+	}
 }

@@ -1,13 +1,25 @@
 <?php
 include("../../conection.php");
 session_start();
-if (!isset($_SESSION['maQuanLy'])) {
-  header('location:login.php');
+// Cho phép admin hoặc nhân viên
+if (!isset($_SESSION['maQuanLy']) && !isset($_SESSION['maNhanVien'])) {
+  header('location:../login.php');
+  exit;
 }
-$id = $_SESSION['maQuanLy'];
-$sql_quanly = "SELECT * FROM quanly WHERE maQuanLy = $id LIMIT 1";
-$query_quanly = mysqli_query($mysqli, $sql_quanly);
-$row_quanly = mysqli_fetch_array($query_quanly);
+
+if (isset($_SESSION['maQuanLy'])) {
+  $id = (int)$_SESSION['maQuanLy'];
+  $sql_quanly = "SELECT * FROM quanly WHERE maQuanLy = $id LIMIT 1";
+  $query_quanly = mysqli_query($mysqli, $sql_quanly);
+  $row_quanly = mysqli_fetch_array($query_quanly);
+} else {
+  $id = (int)$_SESSION['maNhanVien'];
+  $sql_nv = "SELECT * FROM nhanvien WHERE maNhanVien = $id LIMIT 1";
+  $query_nv = mysqli_query($mysqli, $sql_nv);
+  $row_nv = mysqli_fetch_array($query_nv);
+  $row_quanly = array();
+  $row_quanly['tenQuanLy'] = isset($row_nv['tenNhanVien']) ? $row_nv['tenNhanVien'] : 'Nhân viên';
+}
 
 $sqlAllProduct = "SELECT * FROM sanpham ORDER BY maSanPham DESC";
 $query_AllProduct = mysqli_query($mysqli, $sqlAllProduct);
@@ -40,65 +52,7 @@ $query_AllProduct = mysqli_query($mysqli, $sqlAllProduct);
     <?php include("navbar.php"); ?>
     <!-- /.navbar -->
 
-    <!-- Main Sidebar Container -->
-    <aside class="main-sidebar sidebar-dark-primary elevation-4">
-      <!-- Brand Logo -->
-      <a href="../index.php" class="brand-link">
-        <img src="../dist/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3"
-          style="opacity: .8">
-        <span class="brand-text font-weight-light" style="font-size:17px;">
-          <?php echo $row_quanly['tenQuanLy'] ?>
-        </span>
-      </a>
-      <!-- Sidebar -->
-      <div class="sidebar">
-
-
-        <!-- Sidebar Menu -->
-        <nav class="mt-2">
-          <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-            <a href="../index.php" class="nav-link">
-              <i class="nav-icon fas fa-tachometer-alt"></i>
-              <p>
-                Thống Kê
-              </p>
-            </a>
-            <a href="product.php" class="nav-link active">
-              <i class="nav-icon fas fa-th"></i>
-              <p>
-                Quản Lý Sản Phẩm
-              </p>
-            </a>
-            <a href="category.php" class="nav-link">
-              <i class="nav-icon fas fa-table"></i>
-              <p>
-                Quản Lý Danh Mục
-              </p>
-            </a>
-            <a href="bills.php" class="nav-link">
-              <i class="nav-icon fas fa-book"></i>
-              <p>
-                Quản Lý Hóa Đơn
-              </p>
-            </a>
-
-            <a href="users.php" class="nav-link">
-              <i class="nav-icon fas fa-users"></i>
-              <p>
-                Quản Lý Khách Hàng
-              </p>
-            </a>
-
-            <a href="suggestsupport.php" class="nav-link">
-              <i class="nav-icon fas fa-life-ring"></i>
-              <p>Quản Lý Hỗ Trợ</p>
-              </a>
-
-        </nav>
-        <!-- /.sidebar-menu -->
-      </div>
-      <!-- /.sidebar -->
-    </aside>
+    <?php include("../menu.php"); ?>
 
     <!-- Content Wrapper. Contains page content -->
     <div class="content-wrapper">
@@ -161,7 +115,7 @@ $query_AllProduct = mysqli_query($mysqli, $sqlAllProduct);
                         $query_nameLevel = mysqli_query($mysqli, $sql_nameLevel);
                         $row_getNameLevel = mysqli_fetch_array($query_nameLevel);
 
-                        ?>
+                      ?>
                         <tr>
                           <td>
                             <?php echo $i ?>
@@ -200,7 +154,7 @@ $query_AllProduct = mysqli_query($mysqli, $sqlAllProduct);
 
                           </td>
                         </tr>
-                        <?php
+                      <?php
                       }
                       ?>
 
@@ -209,70 +163,87 @@ $query_AllProduct = mysqli_query($mysqli, $sqlAllProduct);
                   </table>
                 </div>
                 <!-- /.card-body -->
+                <!-- Modal Delete Product-->
+                <div id="myModal" class="modal fade" role="dialog">
+                  <div class="modal-dialog">
+                    <!-- Modal content-->
+                    <div class="modal-content" style="text-align:center;width:600px">
+                      </br>
+                      </br>
+                      <div class="modal-body">
+                        <h5>Bạn có chắc muốn xóa sản phẩm này chứ ?</5>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-default" style="background:#d3f3f5 "><a
+                            href="actionProduct.php?id_product=<?= $data['id'] ?>&size=<?php echo $data['size'] ?>">Xóa</a></button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal"
+                          style="background:#f3b6b6">Không</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- END Modal Delete Product-->
+                <tfoot>
+                </tfoot>
+                </table>
+                </table>
               </div>
-              <!-- /.card -->
+              <!-- /.card-body -->
             </div>
-            <!-- /.col -->
+            <!-- /.card -->
           </div>
-          <!-- /.row -->
+          <!-- /.col -->
         </div>
-        <!-- /.container-fluid -->
-      </section>
-      <!-- /.content -->
+        <!-- /.row -->
     </div>
-    <!-- /.content-wrapper -->
-    <footer class="main-footer">
-      <<?php include("../footer.php") ?>
-    </footer>
+    <!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+  <footer class="main-footer">
+    <?php include("../footer.php") ?>
+  </footer>
 
-    <!-- Control Sidebar -->
-    <aside class="control-sidebar control-sidebar-dark">
-      <!-- Control sidebar content goes here -->
-    </aside>
-    <!-- /.control-sidebar -->
+  <!-- Control Sidebar -->
+  <aside class="control-sidebar control-sidebar-dark">
+    <!-- Control sidebar content goes here -->
+  </aside>
+  <!-- /.control-sidebar -->
   </div>
   <!-- ./wrapper -->
 
 
-  <link rel="stylesheet" href="../../css/bootstrap.min.css">
-  <!-- Bootstrap CSS
-        ============================================ -->
-  <link rel="stylesheet" href="../../css/font-awesome.min.css">
-  <!-- owl.carousel CSS
-        ============================================ -->
-  <link rel="stylesheet" href="../../css/owl.carousel.css">
-  <link rel="stylesheet" href="../../css/owl.theme.css">
-  <link rel="stylesheet" href="../../css/owl.transitions.css">
   <!-- jquery-ui CSS
-        ============================================ -->
+      ============================================ -->
   <link rel="stylesheet" href="../../css/jquery-ui.css">
   <!-- meanmenu CSS
-        ============================================ -->
+      ============================================ -->
   <link rel="stylesheet" href="../../css/meanmenu.min.css">
   <!-- nivoslider CSS
-        ============================================ -->
+      ============================================ -->
   <link rel="stylesheet" href="../../lib/css/nivo-slider.css">
   <link rel="stylesheet" href="../../lib/css/preview.css">
   <!-- animate CSS
-        ============================================ -->
+      ============================================ -->
   <link rel="stylesheet" href="../../css/animate.css">
   <!-- magic CSS
-        ============================================ -->
+      ============================================ -->
   <link rel="stylesheet" href="../../css/magic.css">
   <!-- normalize CSS
-        ============================================ -->
+      ============================================ -->
   <link rel="stylesheet" href="../../css/normalize.css">
   <!-- main CSS
-        ============================================ -->
+      ============================================ -->
   <link rel="stylesheet" href="../../css/main.css">
   <!-- style CSS
-        ============================================ -->
+      ============================================ -->
   <link rel="stylesheet" href="../../style.css">
   <!-- responsive CSS
-        ============================================ -->
+      ============================================ -->
   <link rel="stylesheet" href="../../css/responsive.css">
   <!-- modernizr JS
-        ============================================ -->
+      ============================================ -->
   <script src="../../js/vendor/modernizr-2.8.3.min.js"></script>
 </body>
 

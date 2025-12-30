@@ -1,13 +1,26 @@
 <?php
 include("../conection.php");
 session_start();
-if (!isset($_SESSION['maQuanLy'])) {
+// Cho phép admin (maQuanLy) hoặc nhân viên (maNhanVien) truy cập
+if (!isset($_SESSION['maQuanLy']) && !isset($_SESSION['maNhanVien'])) {
   header('location:login.php');
+  exit;
 }
-$id = $_SESSION['maQuanLy'];
-$sql_quanly = "SELECT * FROM quanly WHERE maQuanLy = $id LIMIT 1";
-$query_quanly = mysqli_query($mysqli, $sql_quanly);
-$row_quanly = mysqli_fetch_array($query_quanly);
+
+if (isset($_SESSION['maQuanLy'])) {
+  $id = (int)$_SESSION['maQuanLy'];
+  $sql_quanly = "SELECT * FROM quanly WHERE maQuanLy = $id LIMIT 1";
+  $query_quanly = mysqli_query($mysqli, $sql_quanly);
+  $row_quanly = mysqli_fetch_array($query_quanly);
+} else {
+  // nhân viên - lấy thông tin từ bảng nhanvien và chuẩn hóa tên để menu dùng chung
+  $id = (int)$_SESSION['maNhanVien'];
+  $sql_nv = "SELECT * FROM nhanvien WHERE maNhanVien = $id LIMIT 1";
+  $query_nv = mysqli_query($mysqli, $sql_nv);
+  $row_nv = mysqli_fetch_array($query_nv);
+  $row_quanly = array();
+  $row_quanly['tenQuanLy'] = isset($row_nv['tenNhanVien']) ? $row_nv['tenNhanVien'] : 'Nhân viên';
+}
 //get count of Orders
 $trangThaiDonHang = '0';
 $sql_getNewOrder = "SELECT  * FROM donhang ";
@@ -31,7 +44,8 @@ if (isset($_GET['errCode'])) {
 }
 
 if (!function_exists('payment_text')) {
-  function payment_text($v) {
+  function payment_text($v)
+  {
     $v = isset($v) ? (int)$v : 0;
     if ($v === 1) return 'Thanh toán bằng thẻ';
     if ($v === 2) return 'Thanh toán khi nhận hàng';
@@ -47,6 +61,45 @@ if (!function_exists('currency_format')) {
       return number_format($number, 0, ',', '.') . "{$suffix}";
     }
   }
+}
+// ================= BIỂU ĐỒ THEO THÁNG =================
+$fromDate = $_GET['from_date'] ?? '';
+$toDate   = $_GET['to_date'] ?? '';
+
+$whereDate = '';
+if (!empty($fromDate) && !empty($toDate)) {
+  $fromDate = mysqli_real_escape_string($mysqli, $fromDate);
+  $toDate   = mysqli_real_escape_string($mysqli, $toDate);
+  $whereDate = "WHERE DATE(thoiGian) BETWEEN '$fromDate' AND '$toDate'";
+}
+$sql_chart = "
+SELECT 
+  DATE(thoiGian) AS ngay,
+  SUM(CASE WHEN trangThaiDonHang = 1 THEN tongGia ELSE 0 END) AS doanhThu,
+  SUM(CASE WHEN trangThaiDonHang = 0 THEN 1 ELSE 0 END) AS choXacNhan,
+  SUM(CASE WHEN trangThaiDonHang = 1 THEN 1 ELSE 0 END) AS thanhCong,
+  SUM(CASE WHEN trangThaiDonHang = 2 THEN 1 ELSE 0 END) AS daHuy
+FROM donhang
+$whereDate
+GROUP BY DATE(thoiGian)
+ORDER BY DATE(thoiGian) ASC
+";
+
+
+$query_chart = mysqli_query($mysqli, $sql_chart);
+
+$chartLabels = [];
+$chartRevenue = [];
+$chartPending = [];
+$chartSuccess = [];
+$chartCancel = [];
+
+while ($c = mysqli_fetch_assoc($query_chart)) {
+  $chartLabels[] = date('d/m/Y', strtotime($c['ngay']));
+  $chartRevenue[] = (int)$c['doanhThu'];
+  $chartPending[] = (int)$c['choXacNhan'];
+  $chartSuccess[] = (int)$c['thanhCong'];
+  $chartCancel[] = (int)$c['daHuy'];
 }
 ?>
 
@@ -126,14 +179,14 @@ if (!function_exists('currency_format')) {
                   $Money = 0;
                   while ($row = mysqli_fetch_array($query_getNewOrder)) {
 
-                     if ((int)$row['trangThaiDonHang'] === 0) {
-                        // 0 = chờ xác nhận
-                       $newOrder++;
+                    if ((int)$row['trangThaiDonHang'] === 0) {
+                      // 0 = chờ xác nhận
+                      $newOrder++;
                     } elseif ((int)$row['trangThaiDonHang'] === 1) {
-                         // 1 = đã xác nhận/thành công -> mới tính doanh thu & số đơn thành công
-                     $Money += (float)$row['tongGia'];
-                   $successOrder++;
-                     }
+                      // 1 = đã xác nhận/thành công -> mới tính doanh thu & số đơn thành công
+                      $Money += (float)$row['tongGia'];
+                      $successOrder++;
+                    }
                   }
                   ?>
                   <h3>
@@ -206,20 +259,42 @@ if (!function_exists('currency_format')) {
             </div>
             <!-- ./col -->
 
-<!-- Biểu đồ tổng quan (phía dưới đơn hàng) -->
-<div class="row">
-  <div class="col-12">
-    <div class="card" style="min-height: 420px;">
-      <div class="card-header">
-        <h3 class="card-title">Biểu đồ tổng quan</h3>
-      </div>
-      <div class="card-body" style="height: 380px;">
-        <canvas id="overviewChart" height="360"></canvas>
-      </div>
-    </div>
-  </div>
-</div>
-<!-- /Biểu đồ tổng quan -->
+            <!-- Biểu đồ tổng quan (phía dưới đơn hàng) -->
+            <div class="row">
+              <div class="col-12">
+                <div class="card" style="min-height: 420px;">
+                  <div class="card-header">
+                    <h3 class="card-title">Biểu đồ tổng quan</h3>
+                  </div>
+                  <div class="card-body" style="height: 380px;">
+                    <form method="GET" class="mb-3">
+            <div class="row">
+               <div class="col-md-4">
+               <label>Từ ngày</label>
+             <input type="date" name="from_date" class="form-control"
+                 value="<?php echo $_GET['from_date'] ?? ''; ?>">
+              </div>
+
+            <div class="col-md-4">
+          <label>Đến ngày</label>
+          <input type="date" name="to_date" class="form-control"
+           value="<?php echo $_GET['to_date'] ?? ''; ?>">
+          </div>
+
+         <div class="col-md-4 d-flex align-items-end">
+         <button type="submit" class="btn btn-primary w-100">
+                 Lọc biểu đồ
+         </button>
+               </div>
+        </div>
+          </form>
+
+                    <canvas id="overviewChart" height="360"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- /Biểu đồ tổng quan -->
 
 
             <div class="card-body">
@@ -227,25 +302,25 @@ if (!function_exists('currency_format')) {
               <h4 style="text-align: center; color:red">
                 <?php if (isset($result))
                   echo $result ?>
-                </h4>
-                <table id="example2" class="table table-bordered table-hover">
-                  <thead>
-                    <tr>
-                      <th>STT</th>
-                      <th>Mã đơn hàng</th>
-                      <th>Mã khách hàng</th>
-                      <th>Ghi chú</th>
-                      <th>Tổng giá</th>
-                      <th>Phương thức</th>
-                      <th>Giời gian tạo</th>
-                      <th>Tùy chỉnh</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <?php
-                $std = 0;
-                while ($row_getOrdersNotSuccess = mysqli_fetch_array($query_getOrdersNotSuccess)) {
-                  $std++;
+              </h4>
+              <table id="example2" class="table table-bordered table-hover">
+                <thead>
+                  <tr>
+                    <th>STT</th>
+                    <th>Mã đơn hàng</th>
+                    <th>Mã khách hàng</th>
+                    <th>Ghi chú</th>
+                    <th>Tổng giá</th>
+                    <th>Phương thức</th>
+                    <th>Giời gian tạo</th>
+                    <th>Tùy chỉnh</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <?php
+                  $std = 0;
+                  while ($row_getOrdersNotSuccess = mysqli_fetch_array($query_getOrdersNotSuccess)) {
+                    $std++;
                   ?>
                     <tr>
                       <td>
@@ -264,7 +339,7 @@ if (!function_exists('currency_format')) {
                         <?php echo $row_getOrdersNotSuccess['tongGia'] ?>
                       </td>
                       <td><?php echo payment_text($row_getOrdersNotSuccess['phuongThucThanhToan'] ?? 2); ?>
-                    </td>
+                      </td>
                       <td>
                         <?php echo $row_getOrdersNotSuccess['thoiGian'] ?>
                       </td>
@@ -276,16 +351,16 @@ if (!function_exists('currency_format')) {
                         </a>
                         <a type="button" class="btn btn-danger"
                           style="margin-bottom: 10px;"
-                         href="../function.php?idOrderCancel=<?php echo (int)$row_getOrdersNotSuccess['maDonHang']; ?>"
-                         onclick="return confirm('Bạn có chắc muốn hủy đơn này không?');">
-                              Hủy
-                                </a>
+                          href="../function.php?idOrderCancel=<?php echo (int)$row_getOrdersNotSuccess['maDonHang']; ?>"
+                          onclick="return confirm('Bạn có chắc muốn hủy đơn này không?');">
+                          Hủy
+                        </a>
 
                       </td>
                     </tr>
-                    <?php
-                }
-                ?>
+                  <?php
+                  }
+                  ?>
                 </tbody>
 
                 <tfoot>
@@ -361,62 +436,97 @@ if (!function_exists('currency_format')) {
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-  // Lấy số liệu PHP đã tính sẵn
-  const metricNewOrder     = <?php echo (int)$newOrder; ?>;
-  const metricSuccessOrder = <?php echo (int)$successOrder; ?>;
-  const metricCustomers    = <?php echo (int)$getCus; ?>;
-  const metricRevenueVND   = <?php echo (int)$Money; ?>;
+const labels = <?php echo json_encode($chartLabels); ?>;
+const revenue = <?php echo json_encode($chartRevenue); ?>;
+const pending = <?php echo json_encode($chartPending); ?>;
+const success = <?php echo json_encode($chartSuccess); ?>;
+const cancel = <?php echo json_encode($chartCancel); ?>;
 
-  const ctx = document.getElementById('overviewChart').getContext('2d');
+const ctx = document.getElementById('overviewChart').getContext('2d');
 
-  // Xoá chart cũ nếu có (tránh lỗi khi reload qua PJAX/partial)
-  if (window._overviewChart) {
-    window._overviewChart.destroy();
-  }
+if (window._overviewChart) {
+  window._overviewChart.destroy();
+}
 
-  window._overviewChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: ['Chờ xác nhận', 'Thành công', 'KH đã đăng kí', 'Doanh thu (đ)'],
-      datasets: [{
-        label: 'Giá trị',
-        data: [metricNewOrder, metricSuccessOrder, metricCustomers, metricRevenueVND],
-      }]
+window._overviewChart = new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: labels,
+    datasets: [
+      {
+        label: 'Doanh thu (VNĐ)',
+        data: revenue,
+        yAxisID: 'yRevenue',
+        borderWidth: 3,
+        tension: 0.4
+      },
+      {
+        label: 'Chờ xác nhận',
+        data: pending,
+        borderWidth: 2,
+        tension: 0.3
+      },
+      {
+        label: 'Thành công',
+        data: success,
+        borderWidth: 2,
+        tension: 0.3
+      },
+      {
+        label: 'Đã hủy',
+        data: cancel,
+        borderWidth: 2,
+        tension: 0.3
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: {
+      mode: 'index',
+      intersect: false
     },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false, // cho phép phóng to theo chiều cao card-body
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: function(ctx) {
-              const isRevenue = ctx.dataIndex === 3;
-              const val = ctx.parsed.y || 0;
-              if (isRevenue) {
-                return ctx.label + ': ' + new Intl.NumberFormat('vi-VN').format(val) + ' đ';
-              }
-              return ctx.label + ': ' + val;
+    plugins: {
+      tooltip: {
+        callbacks: {
+          label: function(ctx) {
+            if (ctx.dataset.label === 'Doanh thu (VNĐ)') {
+              return ctx.dataset.label + ': ' +
+                new Intl.NumberFormat('vi-VN').format(ctx.parsed.y) + ' đ';
             }
+            return ctx.dataset.label + ': ' + ctx.parsed.y;
           }
         }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Số đơn hàng'
+        }
       },
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: {
-            callback: function(value) {
-              return new Intl.NumberFormat('vi-VN').format(value);
-            }
-          },
-          grid: { drawBorder: false }
+      yRevenue: {
+        beginAtZero: true,
+        position: 'right',
+        grid: {
+          drawOnChartArea: false
         },
-        x: {
-          grid: { display: false }
+        ticks: {
+          callback: value =>
+            new Intl.NumberFormat('vi-VN').format(value)
+        },
+        title: {
+          display: true,
+          text: ''
         }
       }
     }
-  });
+  }
+});
 </script>
+
 
 </html>
