@@ -40,9 +40,15 @@ $query_getCategoryMobile = mysqli_query($mysqli, $sql_getCategoryMobile);
 $rowOrder = null;
 if ($orderId > 0) {
     $maKhachHang = (int)$_SESSION['maKhachHang'];
-    $sql = "SELECT * FROM donhang WHERE maDonHang = {$orderId} AND maKhachHang = {$maKhachHang} LIMIT 1";
-    $q = mysqli_query($mysqli, $sql);
-    $rowOrder = mysqli_fetch_assoc($q);
+   $sql = "SELECT * FROM donhang 
+        WHERE maDonHang = ? AND maKhachHang = ?
+        LIMIT 1";
+$stmt = mysqli_prepare($mysqli, $sql);
+mysqli_stmt_bind_param($stmt, "ii", $orderId, $_SESSION['maKhachHang']);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
+$rowOrder = mysqli_fetch_assoc($result);
+
 }
 
 //currrency  format vnd
@@ -62,7 +68,15 @@ function payment_text($v) {
     if ($v === 2) return 'Thanh toán khi nhận hàng';
     return 'Không rõ';
 }
+
+function order_status_text($v) {
+    if ($v == 0) return 'Chờ xác nhận';
+    if ($v == 1) return 'Đã xác nhận';
+    return 'Không rõ';
+}
+
 ?>
+
 
 <!doctype html>
 <html class="no-js" lang="">
@@ -274,17 +288,30 @@ function payment_text($v) {
     <div class="row">
     <h3 style="text-align: center; padding-top: 20px;padding-bottom:10px">Chờ xác nhận</h3>
     <div class="modal-body" style="text-align: center;">
-        <?php if ($rowOrder) { ?>
-            <h5>
-                Đơn hàng của bạn đã hoàn tất.
-                Mã đơn hàng của bạn là: <strong>#<?php echo (int)$orderId; ?></strong>.
-                Vui lòng đợi cửa hàng xác nhận.
-            </h5>
-            <p>Tổng tiền: <strong><?php echo currency_format($rowOrder['tongGia']); ?></strong></p>
-            <p>Phương thức: <strong><?php echo payment_text($rowOrder['phuongThucThanhToan'] ?? 2); ?></strong></p>
-        <?php } else { ?>
-            <h5>Không tìm thấy thông tin đơn hàng hoặc bạn không có quyền xem đơn này.</h5>
-        <?php } ?>
+      <?php if ($rowOrder) { ?>
+    <h5>
+        Đơn hàng của bạn đã được tạo thành công.
+        <br>
+        Mã đơn hàng: <strong>#<?php echo $rowOrder['maDonHang']; ?></strong>
+    </h5>
+
+    <p>Tổng tiền:
+        <strong><?php echo currency_format($rowOrder['tongGia']); ?></strong>
+    </p>
+
+    <p>Thời gian đặt:
+        <strong><?php echo $rowOrder['thoiGian']; ?></strong>
+    </p>
+
+    <p>Trạng thái đơn hàng:
+        <strong><?php echo order_status_text($rowOrder['trangThaiDonHang']); ?></strong>
+    </p>
+<?php } else { ?>
+    <h5 style="color:red">
+        Không tìm thấy thông tin đơn hàng hoặc bạn không có quyền xem đơn này.
+    </h5>
+<?php } ?>
+
         <a type="submit" class="btn btn-info" href="../index.php">Quay lại trang chủ</a>
     </div>
 </div>

@@ -100,7 +100,19 @@ $query_getLevelProduct = mysqli_query($mysqli, $sql_getLevelProduct);
                 Quản Lý Khách Hàng
               </p>
             </a>
+            
 
+              <a href="employee.php" class="nav-link">
+              <i class="nav-icon fas fa-user-tie"></i>
+              <p>
+                Quản Lý Nhân Viên
+              </p>
+            </a>
+
+            <a href="suggestsupport.php" class="nav-link">
+              <i class="nav-icon fas fa-life-ring"></i>
+              <p>Quản Lý Hỗ Trợ</p>
+            </a>
         </nav>
         <!-- /.sidebar-menu -->
       </div>
